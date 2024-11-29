@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 import datetime
-
+import io
+import openpyxl
 class Bakery:
     def __init__(self):
         self.cid = 100
@@ -31,10 +32,13 @@ class Bakery:
             return True
         return False
 
-    def save_to_excel(self, filename="bakery.xlsx"):
-        """Save the current orders to an Excel file."""
-        self.orders.to_excel(filename, index=False)
-        return filename
+    def save_to_excel(self):
+        """Save the current orders to an Excel file and return it as binary data."""
+        output = io.BytesIO()  # In-memory binary stream
+        with pd.ExcelWriter(output, engine="openpyxl") as writer:
+            self.orders.to_excel(writer, index=False)  # Write DataFrame to Excel
+        output.seek(0)  # Reset the stream position
+        return output.read()
 
 
 # Ensure Bakery instance is maintained in session state
@@ -98,11 +102,11 @@ elif menu == "Update Order":
 elif menu == "Save Orders":
     st.header("Save Orders to Excel")
     if st.button("Save to Excel"):
-        filename = bakery.save_to_excel()
-        st.success(f"Orders saved to {filename}")
+        excel_data = bakery.save_to_excel()  # Fetch binary content of the Excel file
+        st.success("Orders saved successfully! Click below to download.")
         st.download_button(
             label="Download Excel File",
-            data=open(filename, "rb").read(),
-            file_name=filename,
+            data=excel_data,
+            file_name="bakery_orders.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
