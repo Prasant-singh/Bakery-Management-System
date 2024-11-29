@@ -11,7 +11,7 @@ class Bakery:
     
     def add_order(self, name, item, quantity):
         """Add a new order to the DataFrame."""
-        order_id = self.cid
+        order_id = self.cid  
         self.cid += 1
         new_order = {
             "id": order_id,
